@@ -18,34 +18,54 @@ const client = new MongoClient(uri, {
   }
 });
 
-app.post('/guardar', async (req, res) => {
+let db;
+
+async function startServer() {
   try {
-    const { sensor, valor } = req.body;
-
-    if (!sensor || !valor) {
-      return res.status(400).json({ error: 'Datos incompletos' });
-    }
-
     await client.connect();
-    const collection = client.db("sensores").collection("lecturas");
-    const resultado = await collection.insertOne({
-      sensor,
-      valor,
-      fecha: new Date()
+    db = client.db("sensores");
+
+    app.post('/guardar', async (req, res) => {
+      try {
+        const { sensor, valor } = req.body;
+
+        if (!sensor || valor === undefined) {
+          return res.status(400).json({ error: 'Datos incompletos' });
+        }
+
+        const collection = db.collection("lecturas");
+        const resultado = await collection.insertOne({
+          sensor,
+          valor,
+          fecha: new Date()
+        });
+
+        res.status(200).json({ mensaje: "Dato guardado", id: resultado.insertedId });
+      } catch (error) {
+        console.error("Error al guardar en MongoDB:", error);
+        res.status(500).json({ error: "Error al guardar en MongoDB" });
+      }
     });
 
-    res.status(200).json({ mensaje: "Dato guardado", id: resultado.insertedId });
+    app.get("/", (req, res) => {
+      res.send("API Humo funcionando");
+    });
+
+    app.listen(PORT, () => {
+      console.log(`Servidor escuchando en el puerto ${PORT}`);
+    });
+
   } catch (error) {
-    res.status(500).json({ error: "Error al guardar en MongoDB" });
-  } finally {
-    await client.close();
+    console.error("Error conectando a MongoDB:", error);
+    process.exit(1);
   }
-});
+}
 
-app.get("/", (req, res) => {
-  res.send("API Humo funcionando");
-});
+startServer();
 
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
+// Opcional: manejar cierre del servidor para desconectar Mongo
+process.on('SIGINT', async () => {
+  console.log("Cerrando conexión a MongoDB...");
+  await client.close();
+  process.exit(0);
 });
