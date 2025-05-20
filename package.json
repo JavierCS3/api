@@ -1,14 +1,21 @@
 {
   "name": "api-humo",
   "version": "1.0.0",
-  "type": "module",
+  "description": "API to receive sensor data and save to MongoDB",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js" // Optional: for development with auto-restart
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.18.2",
-    "mongodb": "^6.5.0"
+    "express": "^4.17.1", // Or latest version
+    "mongodb": "^6.0.0",  // Or latest version, or mongoose
+    "dotenv": "^10.0.0"   // Or latest version
+  },
+  "devDependencies": { // Optional
+    "nodemon": "^2.0.15"
+  },
+  "engines": { // Good practice for Render
+    "node": ">=18.0.0" // Specify your Node.js version
   }
 }
