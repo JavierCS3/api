@@ -1,3 +1,4 @@
+// CORRECTO
 {
   "name": "api-humo",
   "version": "1.0.0",
@@ -5,17 +6,17 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js" // Optional: for development with auto-restart
+    "dev": "nodemon index.js"
   },
   "dependencies": {
-    "express": "^4.17.1", // Or latest version
-    "mongodb": "^6.0.0",  // Or latest version, or mongoose
-    "dotenv": "^10.0.0"   // Or latest version
+    "express": "^4.17.1",
+    "mongodb": "^6.0.0",
+    "dotenv": "^10.0.0"
   },
-  "devDependencies": { // Optional
+  "devDependencies": {
     "nodemon": "^2.0.15"
   },
-  "engines": { // Good practice for Render
-    "node": ">=18.0.0" // Specify your Node.js version
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
