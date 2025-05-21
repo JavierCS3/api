@@ -6,7 +6,8 @@ const app = express();
 const port = process.env.PORT || 3001; // Render sets PORT
 
 // Connection URI - store this in your .env file or Render environment variables
-const uri = process.env.MONGODB_URI; // Esto buscará MONGODB_URI
+// Make sure this is MONGODB_URI in Render's environment settings
+const uri = process.env.MONGODB_URI; 
 if (!uri) {
     console.error("MONGODB_URI not found in environment variables. Please set it.");
     process.exit(1);
@@ -18,9 +19,9 @@ let db;
 async function connectDB() {
     try {
         await client.connect();
-        // CAMBIA "nombreDeTuBaseDeDatos" por el nombre real de tu BD
-        db = client.db("sensoresDB"); // <--- ¡USA AQUÍ EL NOMBRE DE TU BASE DE DATOS REAL! (ej. sensoresDB)
-        console.log("Successfully connected to MongoDB!");
+        // Usa el nombre de tu base de datos real aquí
+        db = client.db("estadosDB"); // <--- ACTUALIZADO
+        console.log("Successfully connected to MongoDB and database 'estadosDB'!");
     } catch (err) {
         console.error("Failed to connect to MongoDB", err);
         process.exit(1); // Exit if DB connection fails
@@ -39,10 +40,11 @@ app.get('/', (req, res) => {
 // Your Arduino will send data here
 app.post('/api/guardar', async (req, res) => {
     if (!db) {
-        return res.status(500).json({ message: "Database not initialized" });
+        // Este mensaje se enviará si la conexión a la BD falló al inicio
+        return res.status(500).json({ message: "Database not initialized or connection failed" });
     }
     try {
-        const data = req.body; // Data from Arduino
+        const data = req.body; 
         console.log("Received data:", data);
 
         // Validate incoming data (optional but recommended)
@@ -50,13 +52,14 @@ app.post('/api/guardar', async (req, res) => {
             return res.status(400).json({ message: "Invalid data format" });
         }
 
-        const collection = db.collection("lecturas"); // Nombre de la colección donde se guardarán los datos
+        // Usa el nombre de tu colección real aquí
+        const collection = db.collection("cambiosEstado"); // <--- ACTUALIZADO
         const result = await collection.insertOne({ ...data, timestamp: new Date() });
 
-        console.log(`A document was inserted with the _id: ${result.insertedId}`);
+        console.log(`A document was inserted into 'cambiosEstado' with the _id: ${result.insertedId}`);
         res.status(201).json({ message: "Data saved successfully", id: result.insertedId });
     } catch (error) {
-        console.error("Error saving data to MongoDB:", error);
+        console.error("Error saving data to MongoDB collection 'cambiosEstado':", error);
         res.status(500).json({ message: "Failed to save data", error: error.message });
     }
 });
@@ -68,6 +71,8 @@ app.listen(port, () => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
     console.log("Closing MongoDB connection...");
-    await client.close();
+    if (client) { // Check if client was initialized
+        await client.close();
+    }
     process.exit(0);
 });
